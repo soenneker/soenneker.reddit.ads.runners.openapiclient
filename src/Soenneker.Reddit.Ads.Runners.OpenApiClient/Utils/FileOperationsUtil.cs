@@ -56,7 +56,7 @@ public sealed class FileOperationsUtil : IFileOperationsUtil
         string? localDirectory = _configuration["Reddit:Ads:LocalDirectory"];
         string gitDirectory = localDirectory is null ? await _gitUtil.CloneToTempDirectory($"https://github.com/soenneker/{Constants.Library.ToLowerInvariantFast()}", cancellationToken: cancellationToken) : Path.GetFullPath(localDirectory);
 
-        if (localDirectory is not null && !File.Exists(Path.Combine(gitDirectory, "src", Constants.Library, $"{Constants.Library}.csproj")))
+        if (localDirectory is not null && !(await _fileUtil.Exists(Path.Combine(gitDirectory, "src", Constants.Library, $"{Constants.Library}.csproj"))))
             throw new InvalidOperationException("LocalDirectory must point to the Reddit Ads OpenApiClient repository.");
 
         string targetFilePath = Path.Combine(gitDirectory, "openapi.json");
@@ -155,14 +155,14 @@ public sealed class FileOperationsUtil : IFileOperationsUtil
         }
     }
 
-    private static async Task AddImageAssetFactory(string sourceDirectory, CancellationToken cancellationToken)
+    private async Task AddImageAssetFactory(string sourceDirectory, CancellationToken cancellationToken)
     {
         // Kiota 1.35 omits this factory when the model is both a property type and a base class.
         const string model = "ComponentsSchemaPostCreativeAssetsImageCreativeAsset";
         string modelPath = Path.Combine(sourceDirectory, "Models", model + ".cs");
-        if (!File.Exists(modelPath) || (await File.ReadAllTextAsync(modelPath, cancellationToken))
+        if (!(await _fileUtil.Exists(modelPath)) || (await _fileUtil.Read(modelPath, cancellationToken: cancellationToken))
             .Contains("static " + model + " CreateFromDiscriminatorValue", StringComparison.Ordinal) ||
-            (await File.ReadAllTextAsync(modelPath, cancellationToken))
+            (await _fileUtil.Read(modelPath, cancellationToken: cancellationToken))
             .Contains("static global::Soenneker.Reddit.Ads.OpenApiClient.Models." + model + " CreateFromDiscriminatorValue", StringComparison.Ordinal))
             return;
 
@@ -182,7 +182,7 @@ public sealed class FileOperationsUtil : IFileOperationsUtil
                 }
             }
             """;
-        await File.WriteAllTextAsync(Path.Combine(sourceDirectory, "Models", model + ".Factory.cs"), factory, cancellationToken);
+        await _fileUtil.Write(Path.Combine(sourceDirectory, "Models", model + ".Factory.cs"), factory, cancellationToken: cancellationToken);
     }
     private async ValueTask BuildAndPush(string gitDirectory, CancellationToken cancellationToken)
     {
