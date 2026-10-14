@@ -30,7 +30,7 @@
         <PackageReference Include="Soenneker.Kiota.Util" Version="4.0.159" />
         <PackageReference Include="Soenneker.Managers.Runners" Version="4.0.2630" />
         <PackageReference Include="Soenneker.OpenApi.Fixer" Version="4.0.391" />
-        <PackageReference Include="Soenneker.Utils.File.Download" Version="4.0.1812" />
+        <PackageReference Include="Soenneker.Utils.File.Download" Version="4.0.1813" />
         <PackageReference Include="Soenneker.Utils.Yaml" Version="4.0.220" />
     </ItemGroup>
     <ItemGroup>
